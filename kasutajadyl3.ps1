@@ -9,9 +9,8 @@ function Translit {
     $translitTable = @{
         'ä' = 'a'
         'ö' = 'o'
-        'õ' = '6'
+        'õ' = 'o'
         'ü' = 'u'
-        
     }
 
     $translitText = $text.ToLower()
@@ -24,10 +23,15 @@ function Translit {
 }
 
 $kasutajanimi = Translit -text "$eesnimi.$perenimi"
+$täisnimi = "$eesnimi $perenimi"
+$kontoKirjeldus = "Kasutaja loodud PowerShell skriptiga"
 
-try {
-    Remove-ADUser -Identity $kasutajanimi -Confirm:$false -ErrorAction Stop
-    Write-Host "Kasutaja $kasutajanimi edukalt kustutatud AD-st."
-} catch {
-    Write-Host "Kasutaja kustutamine ebaõnnestus. Veateade: $($_.Exception.Message)"
+$kasutajaOlemas = Get-ADUser -Filter {SamAccountName -eq $kasutajanimi}
+
+if ($kasutajaOlemas -eq $null) {
+    $parool = ConvertTo-SecureString "Parool1!" -AsPlainText -Force
+    New-ADUser -SamAccountName $kasutajanimi -UserPrincipalName "$kasutajanimi@domain.com" -Name $täisnimi -GivenName $eesnimi -Surname $perenimi -Description $kontoKirjeldus -AccountPassword $parool -Enabled $true
+    Write-Host "Kasutaja $kasutajanimi lisatud AD-sse."
+} else {
+    Write-Host "Kasutaja $kasutajanimi juba eksisteerib AD-s. Vali teine nimi."
 }
