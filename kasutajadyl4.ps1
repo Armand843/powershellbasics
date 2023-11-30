@@ -35,3 +35,4 @@ if ($kasutajaOlemas -eq $null) {
 } else {
     Write-Host "Kasutaja $kasutajanimi juba eksisteerib AD-s. Vali teine nimi."
 }
+
